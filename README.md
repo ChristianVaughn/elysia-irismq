@@ -22,21 +22,21 @@ available in your project.
 Create a class that extends `Event` and decorate it with `@IsEvent()`:
 
 ```ts
-import { IsEvent, Event } from "elysia-irismq";
+import { IsEvent, Event } from 'elysia-irismq';
 
 @IsEvent()
 class SendEmail extends Event<{ to: string }> {
-  async handle() {
-    console.log(`Email to ${this.getPayload().to}`);
-  }
+	async handle() {
+		console.log(`Email to ${this.getPayload().to}`);
+	}
 }
 ```
 
 ## Using the plugin with Elysia
 
 ```ts
-import Elysia from "elysia";
-import { queuePlugin } from "elysia-irismq";
+import Elysia from 'elysia';
+import { queuePlugin } from 'elysia-irismq';
 
 const app = new Elysia().use(queuePlugin(options /* optional */)).listen(3000);
 ```
@@ -51,41 +51,59 @@ See `src/example` for a complete usage example.
 ```ts
 // Options
 type IrisOpts = {
-  /** Redis HOST @default '127.0.0.1' */
-  host: string;
-  /** Redis PORT @default 6379 */
-  port: number;
-  /** Redis USERNAME @default undefined */
-  user?: string;
-  /** Redis PASSWORD @default undefined */
-  pass?: string;
-  /**
-   * If true, only log errors
-   * If false, logs when a job is queued or completed
-   * @default false
-   */
-  silent: boolean;
-  /**
-   * If true, removes the job when it successfully completes When given a number,
-   * it specifies the maximum amount of jobs to keep, or you can provide an object specifying max age and/or count to keep.
-   * @default true (delete job after complete)
-   */
-  removeOnComplete: boolean;
-  /**
-   * If true, removes the job when it fails after all attempts. When given a number,
-   * it specifies the maximum amount of jobs to keep, or you can provide an object specifying max age and/or count to keep.
-   * @default 100 (keep 100 failed attempts in redis)
-   */
-  removeOnFail: boolean | number;
+	/** Redis HOST @default '127.0.0.1' */
+	host: string;
+	/** Redis PORT @default 6379 */
+	port: number;
+	/** Redis USERNAME @default undefined */
+	user?: string;
+	/** Redis PASSWORD @default undefined */
+	pass?: string;
+	/**
+	 * If true, only log errors
+	 * If false, logs when a job is queued or completed
+	 * @default false
+	 */
+	silent: boolean;
+	/**
+	 * If true, removes the job when it successfully completes When given a number,
+	 * it specifies the maximum amount of jobs to keep, or you can provide an object specifying max age and/or count to keep.
+	 * @default true (delete job after complete)
+	 */
+	removeOnComplete: boolean;
+	/**
+	 * If true, removes the job when it fails after all attempts. When given a number,
+	 * it specifies the maximum amount of jobs to keep, or you can provide an object specifying max age and/or count to keep.
+	 * @default 100 (keep 100 failed attempts in redis)
+	 */
+	removeOnFail: boolean | number;
 };
 ```
 
-## Queueing an event
+## Queueing an event within handlers
 
 ```ts
-import { queue } from "elysia-irismq";
+import Elysia from 'elysia';
 
-queue(new SendEmail({ to: "alice@example.com" }));
+const app = new Elysia()
+	.use(queuePlugin()) // default host=127.0.0.1 port=6379 no username or password
+	.get(
+		'/',
+		// queue an Event from request Context
+		({ query: { to }, queue /* decorated context */ }) => {
+			queue(new LogHelloEvent({ message: to }));
+			return 'ok';
+		},
+	)
+	.listen(3000);
+```
+
+## Queueing an event outside handlers
+
+```ts
+import { queue } from 'elysia-irismq';
+
+queue(new SendEmail({ to: 'alice@example.com' }));
 ```
 
 ## Development
