@@ -1,6 +1,8 @@
 import Elysia, { t } from "elysia";
-import { queuePlugin } from "../plugin";
+
 import { LogHelloEvent } from "./event";
+// import { queuePlugin, queue } from 'elysia-irismq' for you
+import { queuePlugin } from "../plugin";
 import { queue } from "../utils";
 
 // You can queue with 'queue' util from another part of the app after the server is running

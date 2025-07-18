@@ -1,4 +1,4 @@
-# Elysia BullMQ Plugin
+# elysia-irismq - BullMQ Plugin for Elysia queues
 
 A small plugin for the [Elysia](https://elysiajs.com) framework that provides a
 Redis backed job queue using [BullMQ](https://docs.bullmq.io/).
