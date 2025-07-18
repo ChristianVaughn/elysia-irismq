@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "bun:test";
+import { describe, it, expect } from "bun:test";
 import { IsEvent, Event, buildEvent } from "../src/event";
 import { queueEventRegistry } from "../src/instances";
 
@@ -29,11 +29,13 @@ describe("Event.safeHandle", () => {
 
   it("wraps non-error throws", async () => {
     class BadEvent extends SampleEvent {
+      // @ts-ignore
       async handle() {
         throw "boom";
       }
     }
-    await expect(new BadEvent({ value: 0 }).safeHandle()).rejects.toBeInstanceOf(Error);
+    await expect(
+      new BadEvent({ value: 0 }).safeHandle()
+    ).rejects.toBeInstanceOf(Error);
   });
 });
-

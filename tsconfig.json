@@ -11,7 +11,8 @@
     "skipLibCheck": true,
     "declaration": true,
     "lib": [
-      "es2021"
+      "es2022",
+      "DOM"
     ]
   },
   "include": [

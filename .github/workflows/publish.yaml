@@ -18,7 +18,7 @@ jobs:
       - run: npm install
         env:
           GITHUB_ARTIFACT_TOKEN: ${{secrets.ARTIFACTS_TOKEN}}
-      - run: tsc -p tsconfig.json
+      - run: tsc
       - run: npm publish
         env:
           GITHUB_ARTIFACT_TOKEN: ${{secrets.ARTIFACTS_TOKEN}}
