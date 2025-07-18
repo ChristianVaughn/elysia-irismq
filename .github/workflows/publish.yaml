@@ -1,4 +1,4 @@
-name: public elysia-bullmq
+name: publish @tuplescompany/elysia-bullmq
 
 on:
   push:
