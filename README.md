@@ -35,10 +35,42 @@ class SendEmail extends Event<{ to: string }> {
 ## Using the plugin with Elysia
 
 ```ts
+// Options
+type IrisOpts = {
+  /** Redis HOST @default '127.0.0.1' */
+  host?: string;
+  /** Redis PORT @default 6379 */
+  port?: number;
+  /** Redis USERNAME @default undefined */
+  user?: string;
+  /** Redis PASSWORD @default undefined */
+  pass?: string;
+  /**
+   * If true, only log errors
+   * If false, logs when a job is queued or completed
+   * @default false
+   */
+  silent: boolean;
+  /**
+   * If true, removes the job when it successfully completes When given a number,
+   * it specifies the maximum amount of jobs to keep, or you can provide an object specifying max age and/or count to keep.
+   * @default true (delete job after complete)
+   */
+  removeOnComplete: boolean;
+  /**
+   * If true, removes the job when it fails after all attempts. When given a number,
+   * it specifies the maximum amount of jobs to keep, or you can provide an object specifying max age and/or count to keep.
+   * @default 100 (keep 100 failed attempts in redis)
+   */
+  removeOnFail: boolean | number;
+};
+```
+
+```ts
 import Elysia from "elysia";
 import { queuePlugin } from "elysia-irismq";
 
-const app = new Elysia().use(queuePlugin()).listen(3000);
+const app = new Elysia().use(queuePlugin(options /* optional */)).listen(3000);
 ```
 
 The plugin will start a BullMQ worker using the provided Redis connection (default host=localhost, port=6379, no user, no password).

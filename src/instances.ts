@@ -8,13 +8,18 @@ export const queueEventRegistry = new Map<
 >();
 
 export type IrisOpts = {
+  /** Redis HOST @default '127.0.0.1' */
   host?: string;
+  /** Redis PORT @default 6379 */
   port?: number;
+  /** Redis USERNAME @default undefined */
   user?: string;
+  /** Redis PASSWORD @default undefined */
   pass?: string;
   /**
    * If true, only log errors
    * If false, logs when a job is queued or completed
+   * @default false
    */
   silent: boolean;
   /**
