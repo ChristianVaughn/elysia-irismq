@@ -4,6 +4,7 @@ import { Queue, Worker } from "bullmq";
 import { queueConnection } from "./instances";
 import type { RedisOpts } from "./types";
 import { queue } from "./utils";
+import type { Job } from "bullmq";
 
 /** Creates or retrieves the default queue instance. */
 export const useDefaultQueue = () => {
@@ -21,7 +22,7 @@ export const queuePlugin = ({ host, port, user, pass }: RedisOpts = {}) =>
 
     const worker = new Worker(
       "queue",
-      async (job) => {
+      async (job: Job) => {
         const event = buildEvent(job.name, job.data);
         return await event.safeHandle();
       },
