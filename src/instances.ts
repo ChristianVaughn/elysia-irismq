@@ -9,9 +9,9 @@ export const queueEventRegistry = new Map<
 
 export type IrisOpts = {
   /** Redis HOST @default '127.0.0.1' */
-  host?: string;
+  host: string;
   /** Redis PORT @default 6379 */
-  port?: number;
+  port: number;
   /** Redis USERNAME @default undefined */
   user?: string;
   /** Redis PASSWORD @default undefined */
