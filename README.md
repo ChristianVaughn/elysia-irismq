@@ -9,7 +9,7 @@ and an Elysia plugin that starts a worker.
 ## Installation
 
 ```bash
-bun install elysia-bullmq
+bun install elysia-irismq
 ```
 
 Peer dependencies `elysia`, `bullmq`, `ioredis` and `typescript` must also be
@@ -20,7 +20,7 @@ available in your project.
 Create a class that extends `Event` and decorate it with `@IsEvent()`:
 
 ```ts
-import { IsEvent, Event } from "elysia-bullmq";
+import { IsEvent, Event } from "elysia-irismq";
 
 @IsEvent()
 class SendEmail extends Event<{ to: string }> {
@@ -34,21 +34,20 @@ class SendEmail extends Event<{ to: string }> {
 
 ```ts
 import Elysia from "elysia";
-import { queuePlugin } from "elysia-bullmq";
+import { queuePlugin } from "elysia-irismq";
 
 const app = new Elysia().use(queuePlugin()).listen(3000);
 ```
 
-The plugin will start a BullMQ worker using the provided Redis connection. It
-also decorates the Elysia context with a `queue` function so you can enqueue
-jobs inside route handlers.
+The plugin will start a BullMQ worker using the provided Redis connection (default host=localhost, port=6379, no user, no password).
+It also decorates the Elysia context with a `queue` function so you can enqueue jobs inside route handlers.
 
 See `src/example` for a complete usage example.
 
 ## Queueing an event
 
 ```ts
-import { queue } from "elysia-bullmq";
+import { queue } from "elysia-irismq";
 
 queue(new SendEmail({ to: "alice@example.com" }));
 ```
