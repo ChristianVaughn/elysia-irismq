@@ -9,7 +9,7 @@ and an Elysia plugin that starts a worker.
 ## Installation
 
 ```bash
-bun install elysia-bullmq
+bun install @tuplescompany/elysia-bullmq
 ```
 
 Peer dependencies `elysia`, `bullmq`, `ioredis` and `typescript` must also be
@@ -20,7 +20,7 @@ available in your project.
 Create a class that extends `Event` and decorate it with `@IsEvent()`:
 
 ```ts
-import { IsEvent, Event } from "elysia-bullmq";
+import { IsEvent, Event } from "@tuplescompany/elysia-bullmq";
 
 @IsEvent()
 class SendEmail extends Event<{ to: string }> {
@@ -34,7 +34,7 @@ class SendEmail extends Event<{ to: string }> {
 
 ```ts
 import Elysia from "elysia";
-import { queuePlugin } from "elysia-bullmq";
+import { queuePlugin } from "@tuplescompany/elysia-bullmq";
 
 const app = new Elysia().use(queuePlugin()).listen(3000);
 ```
@@ -48,7 +48,7 @@ See `src/example` for a complete usage example.
 ## Queueing an event
 
 ```ts
-import { queue } from "elysia-bullmq";
+import { queue } from "@tuplescompany/elysia-bullmq";
 
 queue(new SendEmail({ to: "alice@example.com" }));
 ```
