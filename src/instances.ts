@@ -73,7 +73,7 @@ export const queueConnection = (() => {
 		get(): Redis {
 			if (!connection) {
 				const { host, port, user, pass } = pluginConfig().get();
-				return new Redis({ host, port, username: user, password: pass });
+				return new Redis({ host, port, username: user, password: pass, maxRetriesPerRequest: null });
 			}
 			return connection;
 		},
