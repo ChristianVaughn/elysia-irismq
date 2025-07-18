@@ -35,6 +35,20 @@ class SendEmail extends Event<{ to: string }> {
 ## Using the plugin with Elysia
 
 ```ts
+import Elysia from "elysia";
+import { queuePlugin } from "elysia-irismq";
+
+const app = new Elysia().use(queuePlugin(options /* optional */)).listen(3000);
+```
+
+The plugin will start a BullMQ worker using the provided Redis connection (default host=localhost, port=6379, no user, no password).
+It also decorates the Elysia context with a `queue` function so you can enqueue jobs inside route handlers.
+
+See `src/example` for a complete usage example.
+
+### Options avaiable
+
+```ts
 // Options
 type IrisOpts = {
   /** Redis HOST @default '127.0.0.1' */
@@ -65,18 +79,6 @@ type IrisOpts = {
   removeOnFail: boolean | number;
 };
 ```
-
-```ts
-import Elysia from "elysia";
-import { queuePlugin } from "elysia-irismq";
-
-const app = new Elysia().use(queuePlugin(options /* optional */)).listen(3000);
-```
-
-The plugin will start a BullMQ worker using the provided Redis connection (default host=localhost, port=6379, no user, no password).
-It also decorates the Elysia context with a `queue` function so you can enqueue jobs inside route handlers.
-
-See `src/example` for a complete usage example.
 
 ## Queueing an event
 
