@@ -1,4 +1,4 @@
-name: publish @tuplescompany/elysia-bullmq
+name: Publish to npm
 
 on:
   push:
@@ -7,19 +7,15 @@ on:
   workflow_dispatch:
 
 jobs:
-  publish-gpr:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
         with:
           node-version: 20
-          registry-url: https://npm.pkg.github.com/
-          scope: "@tuplescompany"
+          registry-url: https://registry.npmjs.org/
+      - run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
       - run: npm install
-        env:
-          GITHUB_ARTIFACT_TOKEN: ${{secrets.ARTIFACTS_TOKEN}}
-      - run: tsc
+      - run: npm run build
       - run: npm publish
-        env:
-          GITHUB_ARTIFACT_TOKEN: ${{secrets.ARTIFACTS_TOKEN}}

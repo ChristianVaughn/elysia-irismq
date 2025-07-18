@@ -1,8 +1,8 @@
 {
-  "name": "@tuplescompany/elysia-bullmq",
+  "name": "elysia-bullmq",
   "version": "0.0.1",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/@tuplescompany"
+    "access": "public"
   },
   "module": "src/index.ts",
   "type": "module",
