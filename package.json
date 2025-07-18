@@ -1,6 +1,6 @@
 {
   "name": "@tuplescompany/elysia-bullmq",
-  "version": "0.1",
+  "version": "0.0.1",
   "module": "src/index.ts",
   "type": "module",
   "scripts": {
