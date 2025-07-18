@@ -1,8 +1,6 @@
 import { queueEventRegistry } from "./instances";
-
 /**
- * Decorator
- * registra el evento en `evenRegistry` globalmente
+ * Registers an event class in the global registry so it can be resolved later.
  */
 export function IsEvent() {
   return function <T extends new (...args: any[]) => any>(constructor: T) {
@@ -11,34 +9,46 @@ export function IsEvent() {
   };
 }
 
+/**
+ * Instantiates an event from its registered name.
+ * @param name Event class name.
+ * @param payload Data passed to the event constructor.
+ */
 export function buildEvent(name: string, payload: any): Event<any> {
   const EventClass = queueEventRegistry.get(name);
   if (!EventClass) throw new Error(`Event ${name} not registered`);
   return new EventClass(payload);
 }
 
+/**
+ * Base class that every queue event should extend.
+ * @template T Payload shape for the event.
+ */
 export abstract class Event<T extends Record<string, any> = any> {
+  /** How many times the job will be retried on failure. */
   public retries: number = 5;
+  /** Delay in milliseconds before retrying a failed job. */
   public delayOnFailure: number = 15000;
 
   constructor(protected readonly payload: T) {}
 
+  /**
+   * Executes the event logic.
+   * @returns A value that will be stored as the job result.
+   */
   abstract handle(): Promise<any>;
 
   /**
-   * Se asegura que el error durante handle() sea del tipo `Error`
-   * bullmq puede tener problemas con errores de otros tipos.
+   * Executes {@link handle} and makes sure thrown values are `Error` objects.
    */
   async safeHandle() {
     try {
       return await this.handle();
     } catch (error) {
-      // Ensure it always throws an Error instance
       if (error instanceof Error) {
         throw error;
       }
 
-      // Wrap non-Error values in a generic Error
       throw new Error(
         typeof error === "string"
           ? error
@@ -47,6 +57,7 @@ export abstract class Event<T extends Record<string, any> = any> {
     }
   }
 
+  /** Returns the original event payload. */
   getPayload(): T {
     return this.payload;
   }

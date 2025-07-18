@@ -5,10 +5,14 @@ import { queueConnection } from "./instances";
 import type { RedisOpts } from "./types";
 import { queue } from "./utils";
 
+/** Creates or retrieves the default queue instance. */
 export const useDefaultQueue = () => {
   return new Queue("queue", { connection: queueConnection.get() });
 };
 
+/**
+ * Elysia plugin that starts a BullMQ worker and exposes a `queue` utility.
+ */
 export const queuePlugin = ({ host, port, user, pass }: RedisOpts = {}) =>
   new Elysia({ name: `queue` }).decorate("queue", queue).onStart(() => {
     if (!queueConnection.isReady()) {

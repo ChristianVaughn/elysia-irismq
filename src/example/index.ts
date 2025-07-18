@@ -3,8 +3,10 @@ import { queuePlugin } from "../plugin";
 import { LogHelloEvent } from "./event";
 import { queue } from "../utils";
 
-// you can queue with 'queue' util from another part of the app <b>after server is running</b>
+// You can queue with 'queue' util from another part of the app after the server is running
+/** Utility service demonstrating how to queue events from anywhere. */
 abstract class Service {
+  /** Queues a greeting event. */
   static helloThere(to: string) {
     queue(new LogHelloEvent({ message: to }));
   }

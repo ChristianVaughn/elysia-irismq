@@ -1,6 +1,9 @@
 import type { Event } from "./event";
 import { useDefaultQueue } from "./plugin";
 
+/**
+ * Queues an event using the default queue.
+ */
 export const queue = <T extends Record<string, any> = any>(event: Event<T>) => {
   useDefaultQueue()
     .add(event.constructor.name, event.getPayload(), {
