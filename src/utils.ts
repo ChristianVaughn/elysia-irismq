@@ -1,16 +1,17 @@
 import type { Event } from './event';
-import { pluginConfig } from './instances';
+import { irisConfig } from './instances';
 import { useDefaultQueue } from './plugin';
 
 /**
  * Queues an event using the default queue.
  */
-export const queue = <T extends Record<string, any> = any>(event: Event<T>) => {
-	const opts = pluginConfig().get();
+export const dispatch = <T extends Record<string, any> = any>(event: Event<T>) => {
+	const opts = irisConfig.get();
+
 	useDefaultQueue()
 		.add(event.constructor.name, event.getPayload(), {
-			removeOnComplete: opts.removeOnComplete,
-			removeOnFail: opts.removeOnFail,
+			removeOnComplete: event.removeOnComplete,
+			removeOnFail: event.removeOnFail,
 			attempts: event.retries,
 			backoff: {
 				type: 'fixed',

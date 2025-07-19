@@ -1,4 +1,4 @@
-export { queueConnection, queueEventRegistry } from './instances';
+export { irisConnection, irisEventRegistry, irisConfig } from './instances';
 export { IsEvent, Event } from './event';
-export { queue } from './utils';
+export { dispatch } from './utils';
 export { queuePlugin } from './plugin';

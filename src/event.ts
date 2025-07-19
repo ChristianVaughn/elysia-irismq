@@ -1,10 +1,10 @@
-import { queueEventRegistry } from './instances';
+import { irisEventRegistry } from './instances';
 /**
  * Registers an event class in the global registry so it can be resolved later.
  */
 export function IsEvent() {
 	return function <T extends new (...args: any[]) => any>(constructor: T) {
-		queueEventRegistry.set(constructor.name, constructor as any);
+		irisEventRegistry.set(constructor.name, constructor as any);
 		console.log(`⚡️ ${constructor.name} registered`);
 	};
 }
@@ -15,8 +15,8 @@ export function IsEvent() {
  * @param payload Data passed to the event constructor.
  */
 export function buildEvent(name: string, payload: any): Event<any> {
-	const EventClass = queueEventRegistry.get(name);
-	if (!EventClass) throw new Error(`Event ${name} not registered`);
+	const EventClass = irisEventRegistry.get(name);
+	if (!EventClass) throw new Error(`Event ${name} not registered. Did you forget @IsEvent() decorator?`);
 	return new EventClass(payload);
 }
 
@@ -25,10 +25,26 @@ export function buildEvent(name: string, payload: any): Event<any> {
  * @template T Payload shape for the event.
  */
 export abstract class Event<T extends Record<string, any> = any> {
-	/** How many times the job will be retried on failure. */
+	/**
+	 * How many times the job will be retried on failure.
+	 */
 	public retries: number = 5;
-	/** Delay in milliseconds before retrying a failed job. */
+	/**
+	 * Delay in milliseconds before retrying a failed job.
+	 */
 	public delayOnFailure: number = 15000;
+	/**
+	 * If true, removes the job when it successfully completes When given a number,
+	 * it specifies the maximum amount of jobs to keep, or you can provide an object specifying max age and/or count to keep.
+	 * @default true (delete job after complete)
+	 */
+	public removeOnComplete: boolean | number = true;
+	/**
+	 * If true, removes the job when it fails after all attempts. When given a number,
+	 * it specifies the maximum amount of jobs to keep, or you can provide an object specifying max age and/or count to keep.
+	 * @default 100 (keep 100 failed attempts in redis)
+	 */
+	public removeOnFail: boolean | number = 100;
 
 	constructor(protected readonly payload: T) {}
 
@@ -36,7 +52,7 @@ export abstract class Event<T extends Record<string, any> = any> {
 	 * Executes the event logic.
 	 * @returns A value that will be stored as the job result.
 	 */
-	abstract handle(): Promise<any>;
+	abstract handle(): Promise<any> | Promise<void>;
 
 	/**
 	 * Executes {@link handle} and makes sure thrown values are `Error` objects.
@@ -49,7 +65,7 @@ export abstract class Event<T extends Record<string, any> = any> {
 				throw error;
 			}
 
-			throw new Error(typeof error === 'string' ? error : `Unexpected error: ${JSON.stringify(error)}`);
+			throw new Error(typeof error === 'string' ? error : JSON.stringify(error));
 		}
 	}
 

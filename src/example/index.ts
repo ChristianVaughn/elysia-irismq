@@ -3,14 +3,14 @@ import Elysia, { t } from 'elysia';
 import { LogHelloEvent } from './event';
 // import { queuePlugin, queue } from 'elysia-irismq' for you
 import { queuePlugin } from '../plugin';
-import { queue } from '../utils';
+import { dispatch } from '../utils';
 
 // You can queue with 'queue' util from another part of the app after the server is running
 /** Utility service demonstrating how to queue events from anywhere. */
 abstract class Service {
 	/** Queues a greeting event. */
 	static helloThere(to: string) {
-		queue(new LogHelloEvent({ message: to }));
+		dispatch(new LogHelloEvent({ message: to }));
 	}
 }
 
@@ -19,8 +19,8 @@ const app = new Elysia()
 	.get(
 		'/',
 		// queue an Event from request Context
-		({ query: { to }, queue }) => {
-			queue(new LogHelloEvent({ message: to }));
+		({ query: { to }, dispatch }) => {
+			dispatch(new LogHelloEvent({ message: to }));
 			return 'ok';
 		},
 		{

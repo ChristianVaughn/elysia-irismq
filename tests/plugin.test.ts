@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'bun:test';
 import { IsEvent, Event, buildEvent } from '../src/event';
-import { queueEventRegistry } from '../src/instances';
+import { irisEventRegistry } from '../src/instances';
 
 @IsEvent()
 class SampleEvent extends Event<{ value: number }> {
@@ -11,7 +11,7 @@ class SampleEvent extends Event<{ value: number }> {
 
 describe('event registry', () => {
 	it('registers events using the decorator', () => {
-		expect(queueEventRegistry.get('SampleEvent')).toBe(SampleEvent);
+		expect(irisEventRegistry.get('SampleEvent')).toBe(SampleEvent);
 	});
 
 	it('builds event instances', () => {

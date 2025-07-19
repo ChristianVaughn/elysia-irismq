@@ -1,32 +1,34 @@
 import Elysia from 'elysia';
 import { buildEvent } from './event';
 import { Queue, Worker } from 'bullmq';
-import { IrisOpts, pluginConfig, queueConnection } from './instances';
-import { queue } from './utils';
+import { IrisOpts, irisConfig, irisConnection } from './instances';
+import { dispatch } from './utils';
 import type { Job } from 'bullmq';
 
 /** Creates or retrieves the default queue instance. */
 export const useDefaultQueue = () => {
-	return new Queue('iris-queue', { connection: queueConnection.get() });
+	return new Queue('iris-queue', { connection: irisConnection.get() });
 };
 
 /**
  * Elysia plugin that starts a BullMQ worker and exposes a `queue` utility.
  */
 export const queuePlugin = (opts: Partial<IrisOpts> = {}) => {
-	pluginConfig().set(opts);
+	irisConfig.set(opts); // set user preferences on startup
 
-	return new Elysia({ name: `iris-queue` }).decorate('queue', queue).onStart(() => {
+	return new Elysia({ name: `iris-queue` }).decorate('dispatch', dispatch).onStart(() => {
 		const worker = new Worker(
 			'iris-queue',
 			async (job: Job) => {
 				const event = buildEvent(job.name, job.data);
-				return await event.safeHandle();
+				const result = await event.safeHandle();
+
+				return result ?? {};
 			},
-			{ connection: queueConnection.get(), autorun: false, concurrency: 20 },
+			{ connection: irisConnection.get(), autorun: false, concurrency: irisConfig.concurrency() },
 		);
 
-		if (!pluginConfig().quiet()) {
+		if (!irisConfig.quiet()) {
 			worker.on('completed', (job, result) => {
 				console.info({
 					context: 'queue.job-completed',

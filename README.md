@@ -19,13 +19,46 @@ available in your project.
 
 ## Defining a new event
 
-Create a class that extends `Event` and decorate it with `@IsEvent()`:
+Create a class that extends `Event` and decorate it with `@IsEvent()` and define how to handle it:
 
 ```ts
 import { IsEvent, Event } from 'elysia-irismq';
 
 @IsEvent()
+class WelcomeEvent extends Event<{ clientId: string }> {
+	// default options
+
+	// void
+	async handle() {
+		await EmailService.sendWelcome(this.payload.clientId);
+	}
+}
+
+@IsEvent()
 class SendEmail extends Event<{ to: string }> {
+	/**
+	 * How many times the job will be retried on failure.
+	 * @optional @default 5
+	 */
+	public override retries: number = 5;
+	/**
+	 * Delay in milliseconds before retrying a failed job.
+	 * @optional @default 15000
+	 */
+	public override delayOnFailure: number = 15000;
+	/**
+	 * If true, removes the job when it successfully completes When given a number,
+	 * it specifies the maximum amount of jobs to keep, or you can provide an object specifying max age and/or count to keep.
+	 * @optional @default true (delete job after complete)
+	 */
+	public override removeOnComplete: boolean | number = true;
+	/**
+	 * If true, removes the job when it fails after all attempts. When given a number,
+	 * it specifies the maximum amount of jobs to keep, or you can provide an object specifying max age and/or count to keep.
+	 * @optional @default 100 (keep 100 failed attempts in redis)
+	 */
+	public override removeOnFail: boolean | number = 100;
+
 	async handle() {
 		console.log(`Email to ${this.getPayload().to}`);
 	}
@@ -42,7 +75,7 @@ const app = new Elysia().use(queuePlugin(options /* optional */)).listen(3000);
 ```
 
 The plugin will start a BullMQ worker using the provided Redis connection (default host=localhost, port=6379, no user, no password).
-It also decorates the Elysia context with a `queue` function so you can enqueue jobs inside route handlers.
+It also decorates the Elysia context with a `dispatch` function so you can enqueue jobs inside route handlers.
 
 See `src/example` for a complete usage example.
 
@@ -66,17 +99,10 @@ type IrisOpts = {
 	 */
 	silent: boolean;
 	/**
-	 * If true, removes the job when it successfully completes When given a number,
-	 * it specifies the maximum amount of jobs to keep, or you can provide an object specifying max age and/or count to keep.
-	 * @default true (delete job after complete)
+	 * Amount of jobs that a single worker is allowed to work on in parallel.
+	 * @default 10
 	 */
-	removeOnComplete: boolean;
-	/**
-	 * If true, removes the job when it fails after all attempts. When given a number,
-	 * it specifies the maximum amount of jobs to keep, or you can provide an object specifying max age and/or count to keep.
-	 * @default 100 (keep 100 failed attempts in redis)
-	 */
-	removeOnFail: boolean | number;
+	concurrency: number;
 };
 ```
 
@@ -89,9 +115,10 @@ const app = new Elysia()
 	.use(queuePlugin()) // default host=127.0.0.1 port=6379 no username or password
 	.get(
 		'/',
-		// queue an Event from request Context
-		({ query: { to }, queue /* decorated context */ }) => {
-			queue(new LogHelloEvent({ message: to }));
+		// dispatch an Event from request Context
+		({ query: { to }, dispatch /* decorated context */ }) => {
+			// the Event is dispatched in the background; does not block request handling
+			dispatch(new SendEmail({ to: 'alice@example.com' }));
 			return 'ok';
 		},
 	)
@@ -101,9 +128,9 @@ const app = new Elysia()
 ## Queueing an event outside handlers
 
 ```ts
-import { queue } from 'elysia-irismq';
+import { dispatch } from 'elysia-irismq';
 
-queue(new SendEmail({ to: 'alice@example.com' }));
+dispatch(new SendEmail({ to: 'alice@example.com' }));
 ```
 
 ## Development
@@ -113,3 +140,14 @@ bun test
 ```
 
 This project uses Bun's test runner and TypeScript.
+
+## ⚠️ Design Scope & Limitations
+
+This plugin is designed for a single Redis-backed job queue, where each job can represent a self-defined events types.
+While it supports multiple event types, all jobs are pushed into the same queue, which makes it a good fit for simple use cases such as:
+
+- Single-purpose background workers
+- medium-scale job processing pipelines
+- Microservice-only scope
+
+Can scale horizontal thanks too BullMQ, but for large-scale pipelines other solutions are better.
