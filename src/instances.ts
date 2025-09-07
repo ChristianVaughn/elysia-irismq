@@ -24,11 +24,6 @@ export type IrisOpts = {
 	 * @default 10
 	 */
 	concurrency: number;
-	/**
-	 * Version of IP stack to use (0 for both IPv4 and IPv6, 4 for IPv4, 6 for IPv6)
-	 * @default 4
-	 */
-	keyFamily: number;
 };
 
 export const irisConfig = (() => {
@@ -40,7 +35,6 @@ export const irisConfig = (() => {
 		pass: undefined,
 		silent: false,
 		concurrency: 10,
-		keyFamily: 4,
 	};
 
 	return {
@@ -73,8 +67,8 @@ export const irisConnection = (() => {
 		/** Initializes the Redis connection if it hasn't been set yet or Returns the active Redis connection. */
 		get(): Redis {
 			if (!connection) {
-				const { host, port, user, pass, keyFamily } = irisConfig.get();
-				return new Redis({ host, port, username: user, password: pass, maxRetriesPerRequest: null, family: keyFamily });
+				const { host, port, user, pass } = irisConfig.get();
+				return new Redis({ host, port, username: user, password: pass, maxRetriesPerRequest: null });
 			}
 			return connection;
 		},
